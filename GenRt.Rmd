@@ -25,7 +25,7 @@ generate_data <- function(N,ngroup,xmean,xvar,ymean,yvar,zmean,zvar){
   names=paste("G_",seq(1,ngroup),sep="")
   DAT=data.frame()
   for(i in seq(1:ngroup)){
-      data=data.frame( matrix(0, ngroup , 3))
+      data=data.frame( matrix(0, ngroup , 4))
       data[,1]=sample(names, nrow(data))
       data[,2]=sample( c(rnorm(N,mean = xmean,sd = xvar),c(1:ngroup)) ,nrow(data))
       data[,3]=sample( c(rnorm(N,mean=ymean,sd = yvar),c(1:ngroup)) ,nrow(data))
@@ -35,7 +35,7 @@ generate_data <- function(N,ngroup,xmean,xvar,ymean,yvar,zmean,zvar){
   colnames(DAT)=c("Group","X","Y","Z")
   DAT
 }
-gendata <- generate_data(50,5,1,2,3,4,5,6)
+gendata <- generate_data(1050,5,1,2,3,4,5,6)
 head(gendata)
 ```
 
@@ -151,14 +151,13 @@ generate_plot <- function(DAT,colorscale="Set1",size=5,alpha=0.5,geom=1,polar=F)
       alpha=alpha,data = DAT)
   }
   if(geom==8){
-      p <- p+geom_bin2d( aes(x=X,
-                             y=Y,
-                             fill = Z
-
+      p <- p+geom_spoke( aes(x=X,y=Y,angle=Z,color=Group
       ),
-      alpha=alpha,size=size,data = DAT)
+      alpha=alpha,radius=size,size=size,data = DAT)
   }
 
+  
+  
   if(polar==T){
       p <- p+coord_polar()
   }
@@ -171,8 +170,8 @@ generate_plot(gendata)
 Below the same function is called, but this time with different parameters.
 
 ```{r generate_plot2}
-
-generate_plot(gendata,colorscale = "Set2",size = 15,geom = 5,polar = T)
+gendata
+generate_plot(gendata,colorscale = "Set2",size = 15,geom = 9,polar = T)
 
 ```
 
@@ -226,4 +225,5 @@ generate_config <- function(NPOP){
   )
 }
 generate_config(10)
+
 ```

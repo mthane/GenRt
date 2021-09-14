@@ -12,7 +12,7 @@ library(shinydashboard)
 library(DT)
 library(keys)
 library(caret)
-
+library(bslib)
 library(visNetwork)
 # Define UI for application that draws a histogram
 
@@ -26,10 +26,13 @@ hotkeys <- c(
 shinyUI(
     
     dashboardPage(
-        dashboardHeader(title = "Personalized Arts"),
+        skin="black",
+        dashboardHeader(title = "GenRt"),
         dashboardSidebar(
             sidebarMenu(
                 menuItem("Home", tabName = "home"),
+                menuItem("Explore", tabName = "explore"),
+                
                 menuItem("Model", tabName = "model")
             )
             
@@ -40,23 +43,15 @@ shinyUI(
             tabItems(
                 tabItem("home",
                         fluidRow(
-                            
+                            uiOutput("confirmUI"),
                             plotOutput("artPlot"),
-                            
-                            
-                            
-                        )#,
-                        # wellPanel(
-                        #     actionButton("shuffle","Shuffle")
-                        # )
+                        )
                         
                 ),
                 
                 tabItem("model",
                         fluidRow(
-                            
                             titlePanel("artRating"),    
-                            
                             textOutput("accuracy"),    
                             plotOutput("confusionmatrix"),
                             visNetworkOutput("rfprint"),
@@ -64,7 +59,15 @@ shinyUI(
                             DTOutput("dataset")
                             
                         )
-                )
+                ),
+                tabItem("explore",
+                        
+                        fluidRow(
+                            plotOutput("responses"),
+                            plotOutput("histogram_ngroups")
+                            
+                        )
+                        )
             )
             
             

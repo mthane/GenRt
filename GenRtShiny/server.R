@@ -44,87 +44,95 @@ COLUMNS = c(
     
 )
 
+scales <-         c(
+    "Set1",
+    "Set2",
+    "Set3",
+    "Pastel1",
+    "Pastel2",
+    "Paired",
+    "Dark2",
+    "Accent",
+    "Blues",
+    "Greys",
+    "BuGn",
+    "Reds",
+    "Oranges",
+    "Greens"
+)
 
 
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
     
+    globalValues <- reactiveValues(data = generate_config(NPOP),
+                              start=T,
+                              start2=T,
+                              model_not_built=T
+    )
     
-    
-    observeEvent(rvalues$start, {
+    observeEvent(globalValues$start, {
         showModal(modalDialog(
             title = "Rate art works",
             "Welcome to GenRt! To start rating the art just use the right or left arrow on your keyboard.
             Use the right arrow if you like what you see and the left arrow if you don't like it!",
             easyClose = T
         ))
-        rvalues$start=F
-        rvalues$responses = c()
+        globalValues$start=F
+        globalValues$responses = c()
         showNotification("Press left or right to start!")
     })
     
-
-
-    rvalues <- reactiveValues(data = generate_config(NPOP),
-                              start=T,
-                              start2=T,
-                              model_not_built=T
-                              )
-    
+    ##### KEY OBSERVER 
+    # this sectionn is executed when one of the keys is pressed
     observeEvent(input$keys , {
 
-        idx <- which(rvalues$data$id == currentID())
-        if(!rvalues$start2){
+        idx <- which(globalValues$data$id == currentID())
+        if(!globalValues$start2){
             if (input$keys == "right") {
-                rvalues$data[idx, "score"] <- 1
-                rvalues$responses = c(rvalues$responses, 1)
+                globalValues$data[idx, "score"] <- 1
+                globalValues$responses = c(globalValues$responses, 1)
             } else{
-                rvalues$data[idx, "score"] <- 0
-                rvalues$responses = c(rvalues$responses, 0)
+                globalValues$data[idx, "score"] <- 0
+                globalValues$responses = c(globalValues$responses, 0)
             }
             
-            rvalues$data[idx, "rated"] <- T
+            globalValues$data[idx, "rated"] <- T
         }
-        rvalues$start2=F
+        globalValues$start2=F
 
-        if(length(which(rvalues$data$score==1))>0){
-            new_art <- crossover(rvalues$data %>%filter(score==1),id=max(rvalues$data$id)+1)
-            rvalues$data <- rbind(rvalues$data,new_art)
+        if(length(which(globalValues$data$score==1))>0){
+            new_art <- crossover(globalValues$data %>%filter(score==1),id=max(globalValues$data$id)+1)
+            globalValues$data <- rbind(globalValues$data,new_art)
         }
-        
-        # if(length(which(rvalues$data$pred_score==0))>0){
-        #     
-        #     rvalues$data <- rvalues$data[-which(rvalues$data$spred_score==0)[1]]
-        # }
-        
-        if (!is.na(treeModel()[1])) {
+
+        if (!is.na(randomForestModel()[1])) {
             
-            idx_not_rated = which(rvalues$data$rated==FALSE)
+            idx_not_rated = which(globalValues$data$rated==FALSE)
             
-            pred <- predict(treeModel(),
-                            rvalues$data[idx_not_rated,],
+            pred <- predict(randomForestModel(),
+                            globalValues$data[idx_not_rated,],
                             type = "raw")
-            print(pred)
-            
-            rvalues$data[idx_not_rated,]$pred_score <- as.numeric(pred)-1
-            rvalues$data$pred_score <- as.factor(rvalues$data$pred_score)
-            print(rvalues$data[idx_not_rated,]$pred_score)
+            globalValues$data[idx_not_rated,]$pred_score <- as.numeric(pred)-1
+            globalValues$data$pred_score <- as.factor(globalValues$data$pred_score)
+            print(globalValues$data[idx_not_rated,]$pred_score)
         }
     })
     
-    
+    ##### CONFIGURATION #####
+    # this reactive event is choosing the configuation that is needed for the art work
     configure <- eventReactive(input$keys, {
-        like <- which(rvalues$data$pred_score == 1)
+        like <- which(globalValues$data$pred_score == 1)
         
         if (nrow(modeldata()) > 5 & length(like) > 0 & runif(1)>0.3) {
-            row <- sample_n(rvalues$data %>% filter(pred_score == 1),
+            row <- sample_n(globalValues$data %>% filter(pred_score == 1),
                             1,
                             replace = T)
         } else{
-            row <- sample_n(rvalues$data , 1, replace = T)
+            row <- sample_n(globalValues$data , 1, replace = T)
         }
-        row <- sample_n(rvalues$data , 1, replace = T)
+        row <- sample_n(globalValues$data , 1, replace = T)
         row
     })
     
@@ -134,16 +142,18 @@ shinyServer(function(input, output) {
     })
     
 
-    
+    # this data will be used for the model
     modeldata <- reactive({
-        modeldata <- rvalues$data %>%
+        modeldata <- globalValues$data %>%
             filter(rated == T)
         
         modeldata$score <- as.factor(modeldata$score)
         modeldata
     })
     
-    treeModel <- eventReactive(input$keys, {
+    ##### MODEL CREATION #####
+    # in this section the model is created
+    randomForestModel <- eventReactive(input$keys, {
         
         sampled <-  upSample(x = modeldata(),
                              y = modeldata()$score)%>%
@@ -151,20 +161,14 @@ shinyServer(function(input, output) {
             select(-c("pred_score","id","rated"))
         
         if (nrow(modeldata()) > 5 &
-            length(unique(sampled$score))>1 &
-            length(rvalues$data$responses)%%10==0
+            length(unique(sampled$score))>1
             ) {
-            if(rvalues$model_not_built){
+            if(globalValues$model_not_built){
                 
                 showNotification("Now there is enough data and a model has been created.
                                  Check out the 'Model' section to see how your model looks like!")
-                rvalues$model_not_built=F
+                globalValues$model_not_built=F
             }
-            print("update model")
-            
-            # train_control <- trainControl(method = "repeatedcv",  
-            #                               number = 5,
-            #                               repeats = 3)
             model <- train(score ~ ., 
                            data = sampled
                            )
@@ -175,11 +179,10 @@ shinyServer(function(input, output) {
         
     })
     
-    output$dataset <- DT::renderDataTable(rvalues$data,
-                                          options=list(scrollX=T))
     
-    output$artID <- renderText(paste0("ID: ", currentID()))
-
+    ##### ART
+    
+    # output of the plot to be rated 
     output$artPlot <- renderPlot({
         conf <- configure()
         gendata <-
@@ -211,22 +214,58 @@ shinyServer(function(input, output) {
         plot
     }, height = 900)
     
-    ##### Data Exploration
     
+    #output of the created plot
     
-    output$responses <- renderPlot({
-        resp <- data.frame(n =seq(1,length(rvalues$responses)), resp = rvalues$responses)
+    output$artPlotCreated <- renderPlot({
 
+        gendata <-
+            generate_data(
+                input$N,
+                input$ngroup,
+                input$xmean,
+                input$xvar,
+                input$ymean,
+                input$yvar,
+                input$zmean,
+                input$zvar
+            )
         
-        ggplot(aes(n,resp),data = resp)+
-            geom_line()+
-            geom_smooth()+
-            theme_bw()
-        
-    })
+        geom = input$geom==c("col",
+                             "tile",
+                             "area",
+                             "point",
+                             "spoke",
+                             "line")
+        print(geom)
+        plot <-
+            generate_plot(
+                gendata,
+                
+                colorscale = which(scales ==input$colorscale),
+                col = geom[1],
+                tile = geom[2],
+                area = geom[3],
+                point = geom[4],
+                line = geom[5],
+                spoke = geom[6],
+                size = input$size,
+                alpha = input$alpha,
+                polar = input$polar
+            )
+        plot
+    }, height = 900)
+
+    ##### STATISTICS
+    # the data set
+    output$dataset <- DT::renderDataTable(globalValues$data,
+                                          options=list(scrollX=T))
+    
+    
+
     
     output$histogram_ngroups <- renderPlot({
-        rvalues$data %>%
+        globalValues$data %>%
             filter(rated==T)%>%
             pivot_longer(cols = COLUMNS)%>%
             mutate(score=as.factor(score))%>%
@@ -238,13 +277,22 @@ shinyServer(function(input, output) {
     })
     
     
-    ##### Model Evaluation 
+    output$responses <- renderPlot({
+        resp <- data.frame(n =seq(1,length(globalValues$responses)), resp = globalValues$responses)
+        
+        
+        ggplot(aes(n,resp),data = resp)+
+            geom_line()+
+            geom_smooth()+
+            theme_bw()
+        
+    })
     
-
+    # Model Evalutation
     
     output$plot_vimp <- renderPlot({
-        req(treeModel())
-        model <- treeModel()
+        req(randomForestModel())
+        model <- randomForestModel()
         
         vimp <- data.frame(imp = varImp(model)$importance,
                            label = rownames(varImp(model)$importance))%>%
@@ -261,10 +309,10 @@ shinyServer(function(input, output) {
     
     
     output$confusionmatrix <- renderPlot({
-        req(treeModel())
-        if (!is.na(treeModel())) {
+        req(randomForestModel())
+        if (!is.na(randomForestModel())) {
             pred <-
-                as.factor(modeldata()$pred_score)#predict(treeModel(),modeldata(),type="class")
+                as.factor(modeldata()$pred_score)#predict(randomForestModel(),modeldata(),type="class")
             ref <- modeldata()$score
             table <- data.frame(confusionMatrix(pred, ref)$table)
             
@@ -293,12 +341,6 @@ shinyServer(function(input, output) {
         }
     })
     
-    output$accuracy <- renderPrint({
-        if (!is.na(treeModel())) {
-            pred <- predict(treeModel(), modeldata(), type = "raw")
-            print(confusionMatrix(pred, modeldata()$score)$overall[1])
-        }
-    })
     
     
 })

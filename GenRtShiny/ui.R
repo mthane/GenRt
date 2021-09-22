@@ -11,6 +11,7 @@ library(shinydashboard)
 library(DT)
 library(keys)
 library(caret)
+library(shinyWidgets)
 
 hotkeys <- c("left",
              "right")
@@ -36,10 +37,66 @@ shinyUI(dashboardPage(
         tabItems(tabItem(
             "rate",
             fluidRow(uiOutput("confirmUI"),
-                     plotOutput("artPlot"),)
+                     plotOutput("artPlot"))
             
         ),
-        
+        tabItem(
+            "create",
+            fluidRow(
+                column(4,
+                       sliderInput("ngroup","Number of groups",2,50,5),
+                       sliderInput("N","N",50,2000,1000),
+
+                       sliderInput("xmean","x mean",1,5,3),
+                       sliderInput("ymean","y mean",1,5,3),
+                       sliderInput("zmean","z mean",1,5,3),
+
+                       sliderInput("xvar","x variance",1,5,3),
+                       sliderInput("yvar","y variance",1,5,3),
+                       sliderInput("zvar","z variance",1,5,3),
+                       checkboxGroupInput("geom",
+                                          "Geometrics",
+                                          choices = c("col",
+                                                      "tile",
+                                                      "area",
+                                                      "point",
+                                                      "spoke",
+                                                      "line"
+                                                      )),
+                       checkboxInput("polar","Polar coordinates",F),
+                
+                       sliderInput("size","Size",1,30,5),
+
+                       sliderInput("alpha","Opacity",0.05,1,0.5),
+                       numericInput("ncolor","Number of colors",2,8),
+                       selectInput("colorscale","Color scale",
+                                   choices = 
+                                       c(
+                           "Set1",
+                           "Set2",
+                           "Set3",
+                           "Pastel1",
+                           "Pastel2",
+                           "Paired",
+                           "Dark2",
+                           "Accent",
+                           "Blues",
+                           "Greys",
+                           "BuGn",
+                           "Reds",
+                           "Oranges",
+                           "Greens"
+                       )
+                       )
+
+                       ),
+                column(8,
+                       plotOutput("artPlotCreated",height=900)
+                       )
+
+            )
+
+        ),
         tabItem(
             "stats",
             tabsetPanel(
@@ -51,17 +108,15 @@ shinyUI(dashboardPage(
                          
                          plotOutput("histogram_ngroups")),
                 tabPanel("Progression",
-                         
-                         plotOutput("responses"),),
+                         plotOutput("responses")),
                 tabPanel("Model",
                          fluidRow(
                              column(6,
                                     
                                     plotOutput("confusionmatrix")),
                              column(6,
-                                    plotOutput("plot_vimp")),
+                                    plotOutput("plot_vimp"))
                              
-                             textOutput("artID"),
                              
                          ))
 

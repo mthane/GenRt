@@ -17,8 +17,34 @@ library(rpart)
 library(rpart.plot)
 library(visNetwork)
 library(yardstick)
+library(tidyr)
+library(caret)
+NPOP = 1000
 
-NPOP = 10000
+COLUMNS = c(
+    "ngroups",
+    "N",
+    "xmean",
+    "xvar",
+    "ymean",
+    "yvar",
+    "zmean",
+    "zvar",
+    "col",
+    "tile",
+    "area",
+    "point",
+    "spoke",
+    "line",
+    "polar",
+    "size",
+    "alpha",
+    "ncolor",
+    "colorscale"
+    
+)
+
+
 
 
 # Define server logic required to draw a histogram
@@ -42,41 +68,63 @@ shinyServer(function(input, output) {
 
     rvalues <- reactiveValues(data = generate_config(NPOP),
                               start=T,
+                              start2=T,
                               model_not_built=T
                               )
     
     observeEvent(input$keys , {
 
         idx <- which(rvalues$data$id == currentID())
-        if (input$keys == "right") {
-            rvalues$data[idx, "score"] <- 1
+        if(!rvalues$start2){
+            if (input$keys == "right") {
+                rvalues$data[idx, "score"] <- 1
+                rvalues$responses = c(rvalues$responses, 1)
+            } else{
+                rvalues$data[idx, "score"] <- 0
+                rvalues$responses = c(rvalues$responses, 0)
+            }
             
-            rvalues$responses = c(rvalues$responses, 1)
-        } else{
-            rvalues$data[idx, "score"] <- 0
-            
-            rvalues$responses = c(rvalues$responses, 0)
+            rvalues$data[idx, "rated"] <- T
         }
-        rvalues$data[idx, "rated"] <- T
+        rvalues$start2=F
+
+        if(length(which(rvalues$data$score==1))>0){
+            new_art <- crossover(rvalues$data %>%filter(score==1),id=max(rvalues$data$id)+1)
+            rvalues$data <- rbind(rvalues$data,new_art)
+        }
+        
+        # if(length(which(rvalues$data$pred_score==0))>0){
+        #     
+        #     rvalues$data <- rvalues$data[-which(rvalues$data$spred_score==0)[1]]
+        # }
+        
         if (!is.na(treeModel()[1])) {
-            pred <- predict(treeModel(),
-                            rvalues$data,
-                            type = "class")
-            rvalues$data$pred_score <- pred
             
+            idx_not_rated = which(rvalues$data$rated==FALSE)
+            
+            pred <- predict(treeModel(),
+                            rvalues$data[idx_not_rated,],
+                            type = "raw")
+            print(pred)
+            
+            rvalues$data[idx_not_rated,]$pred_score <- as.numeric(pred)-1
+            rvalues$data$pred_score <- as.factor(rvalues$data$pred_score)
+            print(rvalues$data[idx_not_rated,]$pred_score)
         }
     })
     
     
     configure <- eventReactive(input$keys, {
         like <- which(rvalues$data$pred_score == 1)
-        if (nrow(modeldata()) > 20 & length(like) > 0) {
+        
+        if (nrow(modeldata()) > 5 & length(like) > 0 & runif(1)>0.3) {
             row <- sample_n(rvalues$data %>% filter(pred_score == 1),
                             1,
                             replace = T)
         } else{
             row <- sample_n(rvalues$data , 1, replace = T)
         }
+        row <- sample_n(rvalues$data , 1, replace = T)
         row
     })
     
@@ -85,6 +133,7 @@ shinyServer(function(input, output) {
         configure()$id
     })
     
+
     
     modeldata <- reactive({
         modeldata <- rvalues$data %>%
@@ -96,24 +145,38 @@ shinyServer(function(input, output) {
     
     treeModel <- eventReactive(input$keys, {
         
-        if (nrow(modeldata()) > 20) {
+        sampled <-  upSample(x = modeldata(),
+                             y = modeldata()$score)%>%
+            select(!Class)%>%
+            select(-c("pred_score","id","rated"))
+        
+        if (nrow(modeldata()) > 5 &
+            length(unique(sampled$score))>1 &
+            length(rvalues$data$responses)%%10==0
+            ) {
             if(rvalues$model_not_built){
                 
-                showNotification("Now there is enough data and a model has been created. Check out the 'Model' section to see how your model looks like!")
+                showNotification("Now there is enough data and a model has been created.
+                                 Check out the 'Model' section to see how your model looks like!")
                 rvalues$model_not_built=F
             }
-            tree <-
-                rpart(score ~ ngroups + N + alpha + polar + size + ncolor + colorscale,
-                      data = modeldata())
+            print("update model")
             
-            tree
+            # train_control <- trainControl(method = "repeatedcv",  
+            #                               number = 5,
+            #                               repeats = 3)
+            model <- train(score ~ ., 
+                           data = sampled
+                           )
+            model
         } else{
             NA
         }
         
     })
     
-    output$dataset <- DT::renderDataTable(rvalues$data)
+    output$dataset <- DT::renderDataTable(rvalues$data,
+                                          options=list(scrollX=T))
     
     output$artID <- renderText(paste0("ID: ", currentID()))
 
@@ -133,10 +196,16 @@ shinyServer(function(input, output) {
         plot <-
             generate_plot(
                 gendata,
+                
                 colorscale = conf$colorscale,
+                col = conf$col,
+                tile = conf$tile,
+                area = conf$area,
+                point = conf$point,
+                line = conf$line,
+                spoke = conf$spoke,
                 size = conf$size,
                 alpha = conf$alpha,
-                geom = conf$geom,
                 polar = conf$polar
             )
         plot
@@ -159,23 +228,40 @@ shinyServer(function(input, output) {
     output$histogram_ngroups <- renderPlot({
         rvalues$data %>%
             filter(rated==T)%>%
+            pivot_longer(cols = COLUMNS)%>%
             mutate(score=as.factor(score))%>%
-        ggplot(aes(x=ngroups,fill=score))+
-            geom_histogram()+
-            scale_fill_discrete()
+        ggplot(aes(y=value,fill=score))+
+            geom_boxplot()+
+            scale_fill_discrete()+
+            facet_wrap(vars(name),scales = "free")
         
     })
     
     
     ##### Model Evaluation 
     
-    output$rfprint <- renderVisNetwork({
-        if (!is.na(treeModel())) {
-            visTree(treeModel())
-        }
+
+    
+    output$plot_vimp <- renderPlot({
+        req(treeModel())
+        model <- treeModel()
+        
+        vimp <- data.frame(imp = varImp(model)$importance,
+                           label = rownames(varImp(model)$importance))%>%
+            arrange(-Overall)
+        
+        colnames(vimp) = c("Importance", "Variable")
+        ggplot(vimp,aes(x=Importance,y=reorder(Variable,Importance)))+
+            #geom_point()+
+            geom_bar(stat = "identity",aes(fill=Importance))+
+            scale_fill_viridis_c()+
+            ylab("Variable")+
+            theme_classic()
     })
     
+    
     output$confusionmatrix <- renderPlot({
+        req(treeModel())
         if (!is.na(treeModel())) {
             pred <-
                 as.factor(modeldata()$pred_score)#predict(treeModel(),modeldata(),type="class")
@@ -209,7 +295,7 @@ shinyServer(function(input, output) {
     
     output$accuracy <- renderPrint({
         if (!is.na(treeModel())) {
-            pred <- predict(treeModel(), modeldata(), type = "class")
+            pred <- predict(treeModel(), modeldata(), type = "raw")
             print(confusionMatrix(pred, modeldata()$score)$overall[1])
         }
     })

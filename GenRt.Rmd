@@ -37,6 +37,7 @@ generate_data <- function(N,ngroup,xmean,xvar,ymean,yvar,zmean,zvar){
 }
 gendata <- generate_data(1050,5,1,2,3,4,5,6)
 head(gendata)
+
 ```
 
 ## Create the plot
@@ -61,7 +62,7 @@ To find these attributes I was playing around with the outcome a bit, and it see
 
 ```{r generate_plot}
 
-generate_plot <- function(DAT,colorscale="Set1",size=5,alpha=0.5,geom=1,polar=F){
+generate_plot <- function(DAT,colorscale="Set1",col=T,tile=T,area=T,point=T,line=T,spoke=T,size=5,alpha=0.5,polar=F){
 
   p <- ggplot() +
     
@@ -79,7 +80,7 @@ generate_plot <- function(DAT,colorscale="Set1",size=5,alpha=0.5,geom=1,polar=F)
     )
   
   
-  if (geom == 1) {
+  if (col) {
     p <- p + geom_col(
       aes(
         x = X,
@@ -92,7 +93,7 @@ generate_plot <- function(DAT,colorscale="Set1",size=5,alpha=0.5,geom=1,polar=F)
       data = DAT
     )
   }
-  if(geom==2){
+  if(tile){
       p <- p+geom_tile( aes(x=X,
                             y=Y,
                             height = Z,
@@ -103,25 +104,25 @@ generate_plot <- function(DAT,colorscale="Set1",size=5,alpha=0.5,geom=1,polar=F)
       ), size=size,
       alpha=alpha,data = DAT)
   }
-  if(geom==3){
-     p <- p+geom_boxplot( aes(x=X,
-                              y=Y,
+  # if(boxplot){
+  #    p <- p+geom_boxplot( aes(x=X,
+  #                             y=Y,
+  # 
+  #                             color=Group,
+  #                             group=Group
+  #    ), size=size,
+  #    alpha=alpha,data = DAT)
+  # }
+  # if(violin){
+  #   p <- p+geom_violin( aes(x=Group,
+  #                           y=Y,
+  # 
+  #                           color=Group
+  #   ),  size=size,
+  #   alpha=alpha,data = DAT)
+  # }
 
-                              color=Group,
-                              group=Group
-     ), size=size,
-     alpha=alpha,data = DAT)
-  }
-  if(geom==4){
-    p <- p+geom_violin( aes(x=Group,
-                            y=Y,
-
-                            color=Group
-    ),  size=size,
-    alpha=alpha,data = DAT)
-  }
-
-  if(geom==5){
+  if(area){
       p <- p+geom_area( aes(x=X,
                             y = Y,
 
@@ -131,7 +132,7 @@ generate_plot <- function(DAT,colorscale="Set1",size=5,alpha=0.5,geom=1,polar=F)
       ), size=size,alpha=alpha,data = DAT)
   }
 
-  if(geom==6){
+  if(point){
       p <- p+geom_point( aes(x=X,
                              y=Y,
 
@@ -140,7 +141,7 @@ generate_plot <- function(DAT,colorscale="Set1",size=5,alpha=0.5,geom=1,polar=F)
       alpha=alpha,data = DAT)
   }
 
-  if(geom==7){
+  if(line){
       p <- p+geom_line( aes(x=X,
                             y=Y,
                             z=Z,
@@ -150,7 +151,7 @@ generate_plot <- function(DAT,colorscale="Set1",size=5,alpha=0.5,geom=1,polar=F)
       ), size=size,
       alpha=alpha,data = DAT)
   }
-  if(geom==8){
+  if(spoke){
       p <- p+geom_spoke( aes(x=X,y=Y,angle=Z,color=Group
       ),
       alpha=alpha,radius=size,size=size,data = DAT)
@@ -171,7 +172,7 @@ Below the same function is called, but this time with different parameters.
 
 ```{r generate_plot2}
 gendata
-generate_plot(gendata,colorscale = "Set2",size = 15,geom = 9,polar = T)
+generate_plot(gendata,colorscale = "Set2",size = 15,polar = T)
 
 ```
 
@@ -185,7 +186,6 @@ generate_config <- function(NPOP){
   data.frame(
     list(
       id = seq(1, NPOP),
-      geom = sample(1:8, NPOP, replace = T),
       ngroups = sample(2:30, NPOP, replace = T),
       N = sample(150:1500, NPOP, replace = T),
       xmean = sample(1:5, NPOP, replace = T),
@@ -194,9 +194,18 @@ generate_config <- function(NPOP){
       xvar = sample(1:50, NPOP, replace = T),
       yvar = sample(1:50, NPOP, replace = T),
       zvar = sample(1:50, NPOP, replace = T),
-      alpha = runif(NPOP, 0, 1),
+      col = sample(c(T,F),NPOP,replace=T),
+      tile = sample(c(T,F),NPOP,replace=T),
+      boxplot= sample(c(T,F),NPOP,replace=T),
+      violin= sample(c(T,F),NPOP,replace=T),
+      area= sample(c(T,F),NPOP,replace=T),
+      point= sample(c(T,F),NPOP,replace=T),
+      spoke= sample(c(T,F),NPOP,replace=T),
+      line = sample(c(T,F),NPOP,replace=T),
+      
       polar = sample(c(T, F), NPOP, replace = T),
       size = sample(seq(1, 100, 1), NPOP, replace = T),
+      alpha = runif(NPOP, 0, 1),
       ncolor = sample(2:8, NPOP, replace = T),
       colorscale = sample(
         c(

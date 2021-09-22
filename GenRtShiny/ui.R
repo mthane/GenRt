@@ -6,79 +6,69 @@
 #
 #    http://shiny.rstudio.com/
 #
-
 library(shiny)
 library(shinydashboard)
 library(DT)
 library(keys)
 library(caret)
-library(bslib)
-library(visNetwork)
-# Define UI for application that draws a histogram
 
+hotkeys <- c("left",
+             "right")
 
-
-hotkeys <- c(
-    "left", 
-    "right"
-)
-
-shinyUI(
-    
-    dashboardPage(
-        skin="black",
-        dashboardHeader(title = "GenRt"),
-        dashboardSidebar(
-            sidebarMenu(
-                menuItem("Home", tabName = "home"),
-                menuItem("Explore", tabName = "explore"),
-                
-                menuItem("Model", tabName = "model")
-            )
+shinyUI(dashboardPage(
+    skin = "black",
+    dashboardHeader(title = "GenRt"),
+    dashboardSidebar(sidebarMenu(
+        menuItem(
+            "GenRt",
+            menuSubItem('Rate', tabName = 'rate'),
+            menuSubItem('Create', tabName = 'create')
+        ),
+        menuItem("Statistics",
+                 tabName = "stats"),
+        menuItem("About",
+                 tabName = "about")
+        
+    )),
+    dashboardBody(
+        useKeys(),
+        keysInput("keys", hotkeys),
+        tabItems(tabItem(
+            "rate",
+            fluidRow(uiOutput("confirmUI"),
+                     plotOutput("artPlot"),)
             
         ),
-        dashboardBody(
-            useKeys(),
-            keysInput("keys", hotkeys),
-            tabItems(
-                tabItem("home",
-                        fluidRow(
-                            uiOutput("confirmUI"),
-                            plotOutput("artPlot"),
-                        )
-                        
-                ),
-                
-                tabItem("model",
-                        fluidRow(
-                            titlePanel("artRating"),    
-                            textOutput("accuracy"),    
-                            plotOutput("confusionmatrix"),
-                            visNetworkOutput("rfprint"),
-                            textOutput("artID"),
-                            DTOutput("dataset")
-                            
-                        )
-                ),
-                tabItem("explore",
-                        
-                        fluidRow(
-                            plotOutput("responses"),
-                            plotOutput("histogram_ngroups")
-                            
-                        )
-                        )
+        
+        tabItem(
+            "stats",
+            tabsetPanel(
+                type = 'tabs',
+                tabPanel("Data",
+                         DTOutput("dataset")),
+                tabPanel("Distributions",
+                         
+                         
+                         plotOutput("histogram_ngroups")),
+                tabPanel("Progression",
+                         
+                         plotOutput("responses"),),
+                tabPanel("Model",
+                         fluidRow(
+                             column(6,
+                                    
+                                    plotOutput("confusionmatrix")),
+                             column(6,
+                                    plotOutput("plot_vimp")),
+                             
+                             textOutput("artID"),
+                             
+                         ))
+
             )
-            
-            
-            
-            
-            
-            
-            
-        )
-        
-        
+
+        ))
     )
     
-)
+    
+))

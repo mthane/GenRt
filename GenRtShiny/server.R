@@ -268,10 +268,44 @@ shinyServer(function(input, output) {
     ##### STATISTICS
     # the data set
     output$dataset <- DT::renderDataTable(globalValues$data,
-                                          options=list(scrollX=T))
+                                          selection = 'single',
+                                          options=list(scrollX=T,
+                                                       selected = 1))
+    
+    output$selectedArtPlot <- renderPlot({
+        req(input$dataset_rows_selected)
+        conf <- globalValues$data[input$dataset_rows_selected,]
+        gendata <-
+            generate_data(
+                conf$N,
+                conf$ngroup,
+                conf$xmean,
+                conf$xvar,
+                conf$ymean,
+                conf$yvar,
+                conf$zmean,
+                conf$zvar
+            )
+        plot <-
+            generate_plot(
+                gendata,
+                
+                colorscale = conf$colorscale,
+                col = conf$col,
+                tile = conf$tile,
+                area = conf$area,
+                point = conf$point,
+                line = conf$line,
+                spoke = conf$spoke,
+                size = conf$size,
+                alpha = conf$alpha,
+                polar = conf$polar
+            )
+        plot
+    })
     
     
-
+    
     
     output$boxplots_ngroups <- renderPlotly({
         p <- globalValues$data %>%
@@ -349,7 +383,7 @@ shinyServer(function(input, output) {
     
     
     
-    output$responses <- renderPlotly({
+    output$responses <- renderPlot({
         resp <- data.frame(n =seq(1,length(globalValues$responses)), resp = globalValues$responses)
         
         
@@ -410,9 +444,6 @@ shinyServer(function(input, output) {
                 theme_bw() +
                 xlim(rev(levels(table$Reference)))
         }
-    })
-    output$markdown <- renderUI({
-        HTML(markdown::markdownToHTML(knit('GenRt.Rmd', quiet = TRUE)))
     })
     
     

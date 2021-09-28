@@ -56,71 +56,83 @@ shinyUI(dashboardPage(
                         plotOutput("artPlot")
                     )),
             tabItem("create",
-                    fluidRow(
-                        column(
-                            2,
-                            sliderInput("ngroup", "Number of groups", 2, 50, 5),
-                            sliderInput("N", "N", 50, 2000, 1000),
+                    wellPanel(
+                        fluidRow(
+                            column(
+                                2,
+                                sliderInput("ngroup", "Number of groups", 2, 50, 5),
+                                sliderInput("N", "N", 50, 2000, 1000),
+                                
+                                sliderInput("xmean", "x mean", 1, 5, 3),
+                                sliderInput("ymean", "y mean", 1, 5, 3),
+                                sliderInput("zmean", "z mean", 1, 5, 3),
+                                
+                                sliderInput("xvar", "x variance", 1, 5, 3),
+                                sliderInput("yvar", "y variance", 1, 5, 3),
+                                sliderInput("zvar", "z variance", 1, 5, 3))
+                            ,
+                            column(2,
+                                   checkboxGroupInput(
+                                       "geom",
+                                       "Geometrics",
+                                       choices = c("col",
+                                                   "tile",
+                                                   "area",
+                                                   "point",
+                                                   "spoke",
+                                                   "line"),
+                                       selected = c("col","area")
+                                   ),
+                                   checkboxInput("polar", "Polar coordinates", F),
+                                   
+                                   sliderInput("size", "Size", 1, 30, 5),
+                                   
+                                   sliderInput("alpha", "Opacity", 0.05, 1, 0.5),
+                                   numericInput("ncolor", "Number of colors", 2, 8),
+                                   selectInput(
+                                       "colorscale",
+                                       "Color scale",
+                                       choices =
+                                           c(
+                                               "Set1",
+                                               "Set2",
+                                               "Set3",
+                                               "Pastel1",
+                                               "Pastel2",
+                                               "Paired",
+                                               "Dark2",
+                                               "Accent",
+                                               "Blues",
+                                               "Greys",
+                                               "BuGn",
+                                               "Reds",
+                                               "Oranges",
+                                               "Greens"
+                                           )
+                                   )
+                                   
+                            ),
+                            column(8,
+                                   plotOutput("artPlotCreated", height = 900))
                             
-                            sliderInput("xmean", "x mean", 1, 5, 3),
-                            sliderInput("ymean", "y mean", 1, 5, 3),
-                            sliderInput("zmean", "z mean", 1, 5, 3),
-                            
-                            sliderInput("xvar", "x variance", 1, 5, 3),
-                            sliderInput("yvar", "y variance", 1, 5, 3),
-                            sliderInput("zvar", "z variance", 1, 5, 3))
-,
-                        column(2,
-                               checkboxGroupInput(
-                                   "geom",
-                                   "Geometrics",
-                                   choices = c("col",
-                                               "tile",
-                                               "area",
-                                               "point",
-                                               "spoke",
-                                               "line"),
-                                   selected = c("col","area")
-                               ),
-                               checkboxInput("polar", "Polar coordinates", F),
-                               
-                               sliderInput("size", "Size", 1, 30, 5),
-                               
-                               sliderInput("alpha", "Opacity", 0.05, 1, 0.5),
-                               numericInput("ncolor", "Number of colors", 2, 8),
-                               selectInput(
-                                   "colorscale",
-                                   "Color scale",
-                                   choices =
-                                       c(
-                                           "Set1",
-                                           "Set2",
-                                           "Set3",
-                                           "Pastel1",
-                                           "Pastel2",
-                                           "Paired",
-                                           "Dark2",
-                                           "Accent",
-                                           "Blues",
-                                           "Greys",
-                                           "BuGn",
-                                           "Reds",
-                                           "Oranges",
-                                           "Greens"
-                                       )
-                               )
-                               
-                        ),
-                        column(8,
-                               plotOutput("artPlotCreated", height = 900))
+                        )
                         
-                    )),
+                    )
+
+                    
+                    ),
             tabItem(
                 "stats",
                 tabsetPanel(
                     type = 'tabs',
                     tabPanel("Data",
-                             DTOutput("dataset")),
+                             wellPanel(
+                                 div("Select a row to see the art work! You can sort the table by clicking on the column."),
+                                 DTOutput("dataset"),
+                                 plotOutput("selectedArtPlot")
+                             )
+                             
+                             ),
                     tabPanel("Distributions",
                              wellPanel(
                                  fluidRow(
@@ -159,6 +171,11 @@ shinyUI(dashboardPage(
                         6,
                         wellPanel(
                             h2("GenRt"),
+                            div('For additional information on how the source code works check:'),
+                            tags$ul(
+                                tags$a(href = "https://github.com/mthane/GenRt", "GitHub"),
+                                tags$a(href = "https://htmlpreview.github.io/?https://github.com/mthane/GenRt/blob/main/GenRtShiny/GenRt.html", "RMarkdown")
+                                ),
                             h3("Generative art with ggplot2"),
                             div(
                                 'There is a great potential for creating digital art by using R’s ggplot2 library and 
@@ -189,6 +206,7 @@ shinyUI(dashboardPage(
                                 tags$li('size (size of the geometric objects)'),
                                 tags$li('colorscale (which color scale is being used)')
                             ),
+                            hr(),
                             h3("How does it work?"),
                             div('
                                    The algorithm works by building a model of what the user likes and what not. 
@@ -203,6 +221,7 @@ shinyUI(dashboardPage(
                                    The random forest predicts all the unrated art works and suggests the user one of the art works,
                                    that the classification algorithm rated as 1.
                                    '),
+                            hr(),
                             tags$img(src='Recommendation.png'),
                         )
                     ),
@@ -230,6 +249,7 @@ shinyUI(dashboardPage(
                                   '),
                                h4("Future ideas"),
                                tags$ul(
+                                   tags$li('Using libraries for generative code that are already there'),
                                    tags$li('Find a larger variety of features and different plots'),
                                    tags$li('Create a user study to find out what can be improved'),
                                    tags$li('Using a data base to capture the various user data in an anonymous way'),

@@ -13,12 +13,11 @@ library(RColorBrewer)
 library(shiny)
 library(dplyr)
 library(randomForest)
-library(rpart)
-library(rpart.plot)
-library(visNetwork)
+
 library(yardstick)
 library(tidyr)
 library(caret)
+library(plotly)
 NPOP = 1000
 
 COLUMNS = c(
@@ -72,22 +71,34 @@ shinyServer(function(input, output) {
                               model_not_built=T
     )
     
-    observeEvent(globalValues$start, {
-        showModal(modalDialog(
-            title = "Rate art works",
-            "Welcome to GenRt! To start rating the art just use the right or left arrow on your keyboard.
-            Use the right arrow if you like what you see and the left arrow if you don't like it!",
-            easyClose = T
-        ))
-        globalValues$start=F
-        globalValues$responses = c()
-        showNotification("Press left or right to start!")
+    # observeEvent(globalValues$start, {
+    #     
+    #     globalValues$start=F
+    #     showModal(modalDialog(
+    #         title = "Rate art works",
+    #         "Welcome to GenRt! To start rating the art just use the right or left arrow on your keyboard.
+    #         Use the right arrow if you like what you see and the left arrow if you don't like it!",
+    #         easyClose = T
+    #     ))
+    #     
+    #     globalValues$responses = c()
+    #     #showNotification("Press left or right to start!")
+    # })
+    trigger <- reactive({
+        if(length(input$keys)==0){
+            print("test")
+            T
+        }else{
+            print(input$keys)
+            input$keys
+        }
     })
     
+
     ##### KEY OBSERVER 
     # this sectionn is executed when one of the keys is pressed
-    observeEvent(input$keys , {
-
+    observeEvent(trigger(), {
+        print("test3")
         idx <- which(globalValues$data$id == currentID())
         if(!globalValues$start2){
             if (input$keys == "right") {
@@ -122,7 +133,7 @@ shinyServer(function(input, output) {
     
     ##### CONFIGURATION #####
     # this reactive event is choosing the configuation that is needed for the art work
-    configure <- eventReactive(input$keys, {
+    configure <- eventReactive(trigger(), {
         like <- which(globalValues$data$pred_score == 1)
         
         if (nrow(modeldata()) > 5 & length(like) > 0 & runif(1)>0.3) {
@@ -264,26 +275,88 @@ shinyServer(function(input, output) {
     
 
     
-    output$histogram_ngroups <- renderPlot({
-        globalValues$data %>%
+    output$boxplots_ngroups <- renderPlotly({
+        p <- globalValues$data %>%
             filter(rated==T)%>%
-            pivot_longer(cols = COLUMNS)%>%
+            pivot_longer(cols = c(
+                "ngroups",
+                "N",
+                "xmean",
+                "xvar",
+                "ymean",
+                "yvar",
+                "zmean",
+                "zvar",
+                "size",
+                "alpha"
+            ))%>%
             mutate(score=as.factor(score))%>%
-        ggplot(aes(y=value,fill=score))+
+        ggplot(aes(x=score,y=value,fill=score))+
             geom_boxplot()+
             scale_fill_discrete()+
-            facet_wrap(vars(name),scales = "free")
+            facet_wrap(vars(name),scales = "free")+
+            labs(title="Other variables",
+                 x = "Score",
+                 y = "Value"
+                 )+
+            theme_bw()
+        ggplotly(p)
+    })
+    
+    
+    output$barchart_ngroups <- renderPlotly({
+        p <-globalValues$data %>%
+            filter(rated==T)%>%
+          
+            pivot_longer(cols =  c("col",
+                         "tile",
+                         "area",
+                         "point",
+                         "spoke",
+                         "line",
+                         "polar"
+                         ))%>%
+            mutate(score=as.factor(score))%>%
+            group_by(score,name)%>%
+            summarise(value = sum(value,na.rm=T))%>%
+            ggplot(aes(x=value,y=name,fill=score))+
+            geom_bar(stat="identity", width=1) +
+            scale_fill_discrete()+
+            labs(
+                title= "Geometrics",
+                x = "Count",
+                y = "Geometric"
+            )+
+            theme_bw()
+        ggplotly(p)
+    })
+    output$barchart_colorscale <- renderPlotly({
+        p <- globalValues$data %>%
+            filter(rated==T)%>%
+            mutate(score=as.factor(score),
+                   colorscale=as.factor(colorscale)
+                   )%>%
+            ggplot(aes(x=colorscale,fill=score))+
+            geom_bar() +
+            scale_fill_discrete()+
+            labs(
+                title= "Colorscale",
+                x = "Colorscale",
+                y = "Count"
+            )+
+            theme_bw()
+        ggplotly(p)
         
     })
     
     
-    output$responses <- renderPlot({
+    
+    output$responses <- renderPlotly({
         resp <- data.frame(n =seq(1,length(globalValues$responses)), resp = globalValues$responses)
         
         
         ggplot(aes(n,resp),data = resp)+
             geom_line()+
-            geom_smooth()+
             theme_bw()
         
     })

@@ -24,20 +24,25 @@ generate_data <-
            yvar,
            zmean,
            zvar) {
-    DAT = data.frame()
     
     names = paste("G_", seq(1, ngroup), sep = "")
-    DAT = data.frame()
-    for (i in seq(1:ngroup)) {
-      data = data.frame(matrix(0, ngroup , 3))
-      data[, 1] = sample(names, nrow(data))
-      data[, 2] = sample(c(rnorm(N, mean = xmean, sd = xvar), c(1:ngroup)) , nrow(data))
-      data[, 3] = sample(c(rnorm(N, mean = ymean, sd = yvar), c(1:ngroup)) , nrow(data))
-      data[, 4] = sample(c(rnorm(N, mean = zmean, sd = zvar), c(1:ngroup)) , nrow(data))
-      DAT = rbind(DAT, data)
-    }
-    colnames(DAT) = c("Group", "X", "Y", "Z")
-    DAT
+    # data = data.frame()
+    # for (i in seq(1:ngroup)) {
+    #   data[, 1] = sample(names, N,replace=T)
+    #   data[, 2] = rnorm(N, mean = xmean, sd = xvar)
+    #   data[, 3] = rnorm(N, mean = ymean, sd = yvar)
+    #   data[, 4] = rnorm(N, mean = zmean, sd = zvar)
+    #   #DAT = rbind(DAT, data)
+    # }
+    data.frame(
+      Group= sample(names, N,replace=T),
+      X = rnorm(N, mean = xmean, sd = xvar),
+      Y = rnorm(N, mean = ymean, sd = yvar),
+      Z = rnorm(N, mean = zmean, sd = zvar)
+    )
+    
+    #colnames(data) = c("Group", "X", "Y", "Z")
+    #data
   }
 
 
@@ -174,7 +179,7 @@ generate_config <- function(NPOP) {
     list(
       id = seq(1, NPOP),
       ngroups = sample(2:20, NPOP, replace = T),
-      N = sample(150:2500, NPOP, replace = T),
+      N = sample(150:250, NPOP, replace = T),
       xmean = sample(1:5, NPOP, replace = T),
       ymean = sample(1:5, NPOP, replace = T),
       zmean = sample(1:5, NPOP, replace = T),

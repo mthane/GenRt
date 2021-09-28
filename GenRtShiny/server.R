@@ -18,6 +18,8 @@ library(yardstick)
 library(tidyr)
 library(caret)
 library(plotly)
+library(e1071)
+
 NPOP = 1000
 
 COLUMNS = c(

@@ -58,7 +58,7 @@ shinyUI(dashboardPage(
             tabItem("create",
                     fluidRow(
                         column(
-                            4,
+                            2,
                             sliderInput("ngroup", "Number of groups", 2, 50, 5),
                             sliderInput("N", "N", 50, 2000, 1000),
                             
@@ -68,45 +68,48 @@ shinyUI(dashboardPage(
                             
                             sliderInput("xvar", "x variance", 1, 5, 3),
                             sliderInput("yvar", "y variance", 1, 5, 3),
-                            sliderInput("zvar", "z variance", 1, 5, 3),
-                            checkboxGroupInput(
-                                "geom",
-                                "Geometrics",
-                                choices = c("col",
-                                            "tile",
-                                            "area",
-                                            "point",
-                                            "spoke",
-                                            "line")
-                            ),
-                            checkboxInput("polar", "Polar coordinates", F),
-                            
-                            sliderInput("size", "Size", 1, 30, 5),
-                            
-                            sliderInput("alpha", "Opacity", 0.05, 1, 0.5),
-                            numericInput("ncolor", "Number of colors", 2, 8),
-                            selectInput(
-                                "colorscale",
-                                "Color scale",
-                                choices =
-                                    c(
-                                        "Set1",
-                                        "Set2",
-                                        "Set3",
-                                        "Pastel1",
-                                        "Pastel2",
-                                        "Paired",
-                                        "Dark2",
-                                        "Accent",
-                                        "Blues",
-                                        "Greys",
-                                        "BuGn",
-                                        "Reds",
-                                        "Oranges",
-                                        "Greens"
-                                    )
-                            )
-                            
+                            sliderInput("zvar", "z variance", 1, 5, 3))
+,
+                        column(2,
+                               checkboxGroupInput(
+                                   "geom",
+                                   "Geometrics",
+                                   choices = c("col",
+                                               "tile",
+                                               "area",
+                                               "point",
+                                               "spoke",
+                                               "line"),
+                                   selected = c("col","area")
+                               ),
+                               checkboxInput("polar", "Polar coordinates", F),
+                               
+                               sliderInput("size", "Size", 1, 30, 5),
+                               
+                               sliderInput("alpha", "Opacity", 0.05, 1, 0.5),
+                               numericInput("ncolor", "Number of colors", 2, 8),
+                               selectInput(
+                                   "colorscale",
+                                   "Color scale",
+                                   choices =
+                                       c(
+                                           "Set1",
+                                           "Set2",
+                                           "Set3",
+                                           "Pastel1",
+                                           "Pastel2",
+                                           "Paired",
+                                           "Dark2",
+                                           "Accent",
+                                           "Blues",
+                                           "Greys",
+                                           "BuGn",
+                                           "Reds",
+                                           "Oranges",
+                                           "Greens"
+                                       )
+                               )
+                               
                         ),
                         column(8,
                                plotOutput("artPlotCreated", height = 900))
@@ -185,14 +188,9 @@ shinyUI(dashboardPage(
                                 tags$li('polar (using polar coordinate system)'),
                                 tags$li('size (size of the geometric objects)'),
                                 tags$li('colorscale (which color scale is being used)')
-                            )
-                        )
-                    ),
-                    column(6,
-                           wellPanel(
-                               
-                               h3("How does it work?"),
-                               div('
+                            ),
+                            h3("How does it work?"),
+                            div('
                                    The algorithm works by building a model of what the user likes and what not. 
                                    First I had the idea of making the algorithm like a genetic algorithm which creates crossovers of art works that are rated with 1 (like) and adds it to the population in each step.
                                    I feared that this idea has the disadvantage of landing in a sort of local optimum, where art works do not really change much over time.
@@ -205,9 +203,39 @@ shinyUI(dashboardPage(
                                    The random forest predicts all the unrated art works and suggests the user one of the art works,
                                    that the classification algorithm rated as 1.
                                    '),
-                               tags$img(src='Recommendation.png'),
-                               h3("Evaluation")
+                            tags$img(src='Recommendation.png'),
+                        )
+                    ),
+                    column(6,
+                           wellPanel(
                                
+
+                               h3("Evaluation"),
+                               h4("Statistics"),
+                               div('
+                               In the tab "Data" one can see a table of all the configurations that produce the art works. When you select a row than you can see the plot in the lower panel.
+                               For seeing the difference between liked or unliked posts I created statistics to compare the distribution of several attributes. This way
+                                   one can evaluate how different the preferences are. This can be found in the tab "Distributions". 
+                                   Also it is possible to see the responses in the tap "Progression".
+                                   Additionaly one can look at the model performance and the features importance of the random forest model.'),
+                               
+                               h4("User feedback"),
+                               div('
+                                   The main goal of this project was to find out how to use R in order to create aesthetic plots. My own impression was that some of the plots look quite aesthetic
+                                   and others look too overcrowded.
+                                   In order to evaluate this I showed the project to some of my friends and fellow students and asked for the feedback and if the recommendations become realistic.
+                                   I did not perform a well defined user study, but my conclusion was that based on this feedback there was no clear improvement in the recommendations.
+                                   The reason for this might be, that the start population is to large or there was simply not enough training data, but this would have to be investigated further.
+                                   
+                                  '),
+                               h4("Future ideas"),
+                               tags$ul(
+                                   tags$li('Find a larger variety of features and different plots'),
+                                   tags$li('Create a user study to find out what can be improved'),
+                                   tags$li('Using a data base to capture the various user data in an anonymous way'),
+                                   tags$li('Improve the model and try different ML methods'),
+                                   tags$li('Capture the reaction times and find out how it effects the preference')
+                               ),
                            )
                            
                            )

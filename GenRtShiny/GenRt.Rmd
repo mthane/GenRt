@@ -8,10 +8,15 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
+library(DT)
+library(dplyr)
 
 ```
 
 # Generative Art Using R
+
+
+
 ## Create the data set
 There is a great potential for creating digital art by using R’s ggplot2 library and create visualizations that look like real art works. Mainly those approaches use data sets which are based on mathematical formulas and can be manipulated as desired. 
 My approach of creating digital art using R is quite similar. First I created a data set that is based on three random variables “X”, “Y” and “Z” and one grouping variable “Group”. These distributions are based on a normal distribution with a given mean and standard deviation.
@@ -19,29 +24,41 @@ My approach of creating digital art using R is quite similar. First I created a 
 
 ```{r create_data}
 
-generate_data <- function(N,ngroup,xmean,xvar,ymean,yvar,zmean,zvar){
-   DAT=data.frame()
-
-  names=paste("G_",seq(1,ngroup),sep="")
-  DAT=data.frame()
-  for(i in seq(1:ngroup)){
-      data=data.frame( matrix(0, ngroup , 4))
-      data[,1]=sample(names, nrow(data))
-      data[,2]=sample( c(rnorm(N,mean = xmean,sd = xvar),c(1:ngroup)) ,nrow(data))
-      data[,3]=sample( c(rnorm(N,mean=ymean,sd = yvar),c(1:ngroup)) ,nrow(data))
-      data[,4]=sample( c(rnorm(N,mean=zmean,sd = zvar),c(1:ngroup)) ,nrow(data))
-      DAT=rbind(DAT,data)
+generate_data <-
+  function(N,
+           ngroup,
+           xmean,
+           xvar,
+           ymean,
+           yvar,
+           zmean,
+           zvar) {
+    
+    names = paste("G_", seq(1, ngroup), sep = "")
+    data.frame(
+      Group= sample(names, N,replace=T),
+      X = rnorm(N, mean = xmean, sd = xvar),
+      Y = rnorm(N, mean = ymean, sd = yvar),
+      Z = rnorm(N, mean = zmean, sd = zvar)
+    )
   }
-  colnames(DAT)=c("Group","X","Y","Z")
-  DAT
-}
+
 gendata <- generate_data(1050,5,1,2,3,4,5,6)
-head(gendata)
+datatable(head(gendata))
 
 ```
 
 ## Create the plot
 Using this data one can now plot an “art work”. I was trying to find attributes that would make the art works look quite different, but that can later also been used to find out which kind of art is preferred by the user. The attributes are the following:
+
+Using this data one can now plot an “art work”. 
+I was trying to find attributes that would make the art works look different,
+but that can later also been used to find out which kind of art is preferred by the user.
+To find these attributes I was playing around with the outcome a bit,
+and it seemed that these attributes create various different visualizations. 
+Some of these visualizations looked rather boring to me and some I enjoyed looking at.
+These visualizations will be used for the recommendation in the next step.
+The attributes are the following:
 
 1. N (Number of samples)
 2. ngroups (Number of different groups)
@@ -104,24 +121,6 @@ generate_plot <- function(DAT,colorscale="Set1",col=T,tile=T,area=T,point=T,line
       ), size=size,
       alpha=alpha,data = DAT)
   }
-  # if(boxplot){
-  #    p <- p+geom_boxplot( aes(x=X,
-  #                             y=Y,
-  # 
-  #                             color=Group,
-  #                             group=Group
-  #    ), size=size,
-  #    alpha=alpha,data = DAT)
-  # }
-  # if(violin){
-  #   p <- p+geom_violin( aes(x=Group,
-  #                           y=Y,
-  # 
-  #                           color=Group
-  #   ),  size=size,
-  #   alpha=alpha,data = DAT)
-  # }
-
   if(area){
       p <- p+geom_area( aes(x=X,
                             y = Y,
@@ -171,15 +170,13 @@ generate_plot(gendata)
 Below the same function is called, but this time with different parameters.
 
 ```{r generate_plot2}
-gendata
 generate_plot(gendata,colorscale = "Set2",size = 15,polar = T)
-
 ```
 
 
 ## Create various configurations
 For creating various different visualizations I created a function that will create random configurations of the attributes.
-
+Below one can see the table with all the different attributes. Additionally there are columns called score, pred_score and rated to save the information about the state of the configuration.
 ```{r generate_configurations}
 
 generate_config <- function(NPOP){
@@ -233,6 +230,48 @@ generate_config <- function(NPOP){
     )
   )
 }
-generate_config(10)
-
+sample_config <- generate_config(10)
+datatable(sample_config,options=list(scrollX=T))
 ```
+Below there is an example of how to use the crossover function. This function is creating mean values of all the attributes to create a new instance. Note that some of the attributes have to be rounded to be useful.
+
+
+```{r generate_configurations2}
+crossover <- function(config_data,id){
+  cr <-config_data %>%
+    summarise(
+      id = 0,
+      ngroups = round(mean(ngroups,na.rm=T)),
+      N = round(mean(N,na.rm=T)),
+      xmean = mean(xmean,na.rm=T),
+      xvar = mean(xvar,na.rm=T),
+      ymean = mean(ymean,na.rm=T),
+      yvar = mean(yvar,na.rm=T),
+      zmean = mean(zmean,na.rm=T),
+      zvar = mean(zvar,na.rm=T),
+      col = round(mean(col,na.rm=T)),
+      tile = round(mean(tile,na.rm=T)),
+      area = round(mean(area,na.rm=T)),
+      point = round(mean(point,na.rm=T)),
+      spoke = round(mean(spoke,na.rm=T)),
+      line = mean(round(line),na.rm=T),
+      polar = as.logical(round(mean(polar,na.rm=T))),
+      size = mean(size,na.rm=T),
+      alpha = mean(alpha,na.rm=T),
+      ncolor = round(mean(ncolor,na.rm=T)),
+      colorscale = round(mean(colorscale,na.rm=T)),
+      score = NA,
+      pred_score = NA,
+      rated = F
+    )
+  cr$id <- id
+  cr
+}
+crossover(sample_config,25)
+```
+
+
+## Additional Code
+
+Besides this functions there is additional code that is used for the Shiny web application. This function are mainly used for building the logic and the model and showing the different plots. The Shiny application consists of two files (server.R and ui.R). Have a look at https://shiny.rstudio.com/ in order to understand how the architecture works!
+

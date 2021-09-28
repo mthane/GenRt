@@ -43,7 +43,7 @@ COLUMNS = c(
     
 )
 
-scales <-         c(
+scales <- c(
     "Set1",
     "Set2",
     "Set3",
@@ -86,19 +86,16 @@ shinyServer(function(input, output) {
     # })
     trigger <- reactive({
         if(length(input$keys)==0){
-            print("test")
             T
         }else{
-            print(input$keys)
             input$keys
         }
     })
     
 
     ##### KEY OBSERVER 
-    # this sectionn is executed when one of the keys is pressed
+    # this section is executed when one of the keys is pressed
     observeEvent(trigger(), {
-        print("test3")
         idx <- which(globalValues$data$id == currentID())
         if(!globalValues$start2){
             if (input$keys == "right") {
@@ -127,7 +124,7 @@ shinyServer(function(input, output) {
                             type = "raw")
             globalValues$data[idx_not_rated,]$pred_score <- as.numeric(pred)-1
             globalValues$data$pred_score <- as.factor(globalValues$data$pred_score)
-            print(globalValues$data[idx_not_rated,]$pred_score)
+
         }
     })
     
@@ -248,7 +245,6 @@ shinyServer(function(input, output) {
                              "point",
                              "spoke",
                              "line")
-        print(geom)
         plot <-
             generate_plot(
                 gendata,

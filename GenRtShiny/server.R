@@ -413,7 +413,9 @@ shinyServer(function(input, output) {
                 xlim(rev(levels(table$Reference)))
         }
     })
-    
+    output$markdown <- renderUI({
+        HTML(markdown::markdownToHTML(knit('GenRt.Rmd', quiet = TRUE)))
+    })
     
     
 })

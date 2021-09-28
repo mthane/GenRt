@@ -5,9 +5,9 @@ account: mthane
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4651297
-bundleId: 5032669
+bundleId: 5079894
 url: https://mthane.shinyapps.io/GenRt/
-when: 1631637564.56339
-lastSyncTime: 1631637564.56339
+when: 1632818234.94685
+lastSyncTime: 1632818234.94685
 asMultiple: FALSE
 asStatic: FALSE

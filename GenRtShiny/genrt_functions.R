@@ -14,6 +14,39 @@ scales <-         c(
   "Oranges",
   "Greens"
 )
+generate_config <- function(NPOP) {
+  data.frame(
+    list(
+      id = seq(1, NPOP),
+      ngroups = sample(2:20, NPOP, replace = T),
+      N = sample(150:250, NPOP, replace = T),
+      xmean = sample(1:5, NPOP, replace = T),
+      ymean = sample(1:5, NPOP, replace = T),
+      zmean = sample(1:5, NPOP, replace = T),
+      xvar = sample(1:50, NPOP, replace = T),
+      yvar = sample(1:50, NPOP, replace = T),
+      zvar = sample(1:50, NPOP, replace = T),
+      col = sample(c(T, F), NPOP, replace = T),
+      tile = sample(c(T, F), NPOP, replace = T),
+      area = sample(c(T, F), NPOP, replace = T),
+      point = sample(c(T, F), NPOP, replace = T),
+      spoke = sample(c(T, F), NPOP, replace = T),
+      line = sample(c(T, F), NPOP, replace = T),
+      
+      polar = sample(c(T, F), NPOP, replace = T),
+      size = sample(seq(1, 30, 1), NPOP, replace = T),
+      alpha = runif(NPOP, 0, 1),
+      ncolor = sample(2:8, NPOP, replace = T),
+      colorscale = sample(1:14,
+                          NPOP,
+                          replace = T
+      ),
+      score = rep(NA, NPOP),
+      pred_score = rep(NA, NPOP),
+      rated = rep(F, NPOP)
+    )
+  )
+}
 
 generate_data <-
   function(N,
@@ -26,23 +59,12 @@ generate_data <-
            zvar) {
     
     names = paste("G_", seq(1, ngroup), sep = "")
-    # data = data.frame()
-    # for (i in seq(1:ngroup)) {
-    #   data[, 1] = sample(names, N,replace=T)
-    #   data[, 2] = rnorm(N, mean = xmean, sd = xvar)
-    #   data[, 3] = rnorm(N, mean = ymean, sd = yvar)
-    #   data[, 4] = rnorm(N, mean = zmean, sd = zvar)
-    #   #DAT = rbind(DAT, data)
-    # }
     data.frame(
       Group= sample(names, N,replace=T),
       X = rnorm(N, mean = xmean, sd = xvar),
       Y = rnorm(N, mean = ymean, sd = yvar),
       Z = rnorm(N, mean = zmean, sd = zvar)
     )
-    
-    #colnames(data) = c("Group", "X", "Y", "Z")
-    #data
   }
 
 
@@ -174,39 +196,6 @@ generate_plot <-
 
 
 
-generate_config <- function(NPOP) {
-  data.frame(
-    list(
-      id = seq(1, NPOP),
-      ngroups = sample(2:20, NPOP, replace = T),
-      N = sample(150:250, NPOP, replace = T),
-      xmean = sample(1:5, NPOP, replace = T),
-      ymean = sample(1:5, NPOP, replace = T),
-      zmean = sample(1:5, NPOP, replace = T),
-      xvar = sample(1:50, NPOP, replace = T),
-      yvar = sample(1:50, NPOP, replace = T),
-      zvar = sample(1:50, NPOP, replace = T),
-      col = sample(c(T, F), NPOP, replace = T),
-      tile = sample(c(T, F), NPOP, replace = T),
-      area = sample(c(T, F), NPOP, replace = T),
-      point = sample(c(T, F), NPOP, replace = T),
-      spoke = sample(c(T, F), NPOP, replace = T),
-      line = sample(c(T, F), NPOP, replace = T),
-      
-      polar = sample(c(T, F), NPOP, replace = T),
-      size = sample(seq(1, 30, 1), NPOP, replace = T),
-      alpha = runif(NPOP, 0, 1),
-      ncolor = sample(2:8, NPOP, replace = T),
-      colorscale = sample(1:14,
-        NPOP,
-        replace = T
-      ),
-      score = rep(NA, NPOP),
-      pred_score = rep(NA, NPOP),
-      rated = rep(F, NPOP)
-    )
-  )
-}
 
 
 

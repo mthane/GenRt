@@ -12,7 +12,8 @@ library(DT)
 library(keys)
 library(caret)
 library(shinyWidgets)
-
+library(knitr)
+library(plotly)
 hotkeys <- c("left",
              "right")
 
@@ -137,6 +138,8 @@ shinyUI(dashboardPage(
                 
             ),
             tabItem("about",
+                    
+                    uiOutput("markdown"),
                     fluidRow(column(
                         6,
                         wellPanel(
@@ -169,11 +172,34 @@ shinyUI(dashboardPage(
                                 tags$li('alpha (opacity value)'),
                                 tags$li('polar (using polar coordinate system)'),
                                 tags$li('size (size of the geometric objects)'),
-                                tags$li('ncolor (number of different colors)'),
                                 tags$li('colorscale (which color scale is being used)')
                             )
                         )
-                    )))
+                    ),
+                    column(6,
+                           wellPanel(
+                               
+                               h3("How does it work?"),
+                               div('
+                                   The algorithm works by building a model of what the user likes and what not. 
+                                   First I had the idea of making the algorithm like a genetic algorithm which creates crossovers of art works that are rated with 1 (like) and adds it to the population in each step.
+                                   I feared that this idea has the disadvantage of landing in a sort of local optimum, where art works do not really change much over time.
+                                   Another idea was to create a semisupervised learning method called self learning,
+                                   where a learned model predicts the unrated images and will recommend art works that are predicted as a 1 (like).
+                                   I endet up using a mixture of both ideas. 
+                                   First of all a start population is being created and the user randomly gets to see some of the art works. After 5 rated art works a model is being created.
+                                   The art works that are rated as 1 will perform a crossover operation which is simply an average value of all the features to create new art works.
+                                   This new art works are then added to the unrated population in each step.
+                                   The random forest predicts all the unrated art works and suggests the user one of the art works,
+                                   that the classification algorithm rated as 1.
+                                   '),
+                               tags$img(src='Recommendation.png'),
+                               h3("Evaluation")
+                               
+                           )
+                           
+                           )
+                    ))
         )
     )
     

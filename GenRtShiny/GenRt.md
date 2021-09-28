@@ -36,13 +36,13 @@ head(gendata)
 ```
 
 ```
-##   Group          X          Y          Z
-## 1   G_2  5.3371827 10.6559562  8.5136840
-## 2   G_4  1.7976104  0.9549612 -0.6911665
-## 3   G_1  1.1728894  7.5681342 -9.1414875
-## 4   G_5 -0.9805761  3.5770292  9.2086493
-## 5   G_3  2.0231267  3.0556441 11.9368353
-## 6   G_5 -2.6900639  7.9296991 10.3481377
+##   Group          X        Y         Z
+## 1   G_3 -1.1757651 4.771281  4.175128
+## 2   G_4  1.6013904 4.375717  2.843582
+## 3   G_5  1.4415897 7.427040 -4.754531
+## 4   G_1  1.3460265 3.294832 10.273472
+## 5   G_2 -0.5793881 6.667002 24.761452
+## 6   G_3  0.2253360 5.672460  9.921660
 ```
 
 ## Create the plot
@@ -187,31 +187,31 @@ gendata
 
 ```
 ##    Group           X          Y          Z
-## 1    G_2  5.33718272 10.6559562  8.5136840
-## 2    G_4  1.79761040  0.9549612 -0.6911665
-## 3    G_1  1.17288942  7.5681342 -9.1414875
-## 4    G_5 -0.98057608  3.5770292  9.2086493
-## 5    G_3  2.02312670  3.0556441 11.9368353
-## 6    G_5 -2.69006393  7.9296991 10.3481377
-## 7    G_1  0.17287909  0.4114346 -0.7328689
-## 8    G_2  2.46745993  7.4565076 10.1068925
-## 9    G_4  4.46989581 10.3052623  3.0626408
-## 10   G_3  1.69282154  5.5476049  7.4420439
-## 11   G_3  2.19830229  6.4860245  9.5725504
-## 12   G_1  1.43545311  4.0186799  3.1256093
-## 13   G_4  1.18172416  0.3370981  6.4013600
-## 14   G_2 -1.80914593 -4.7825175 13.3955558
-## 15   G_5  0.52687584  3.8766069 11.9133755
-## 16   G_3 -0.21689016 -1.3878580 -2.2429813
-## 17   G_2 -1.42524266 -0.1474756 -2.2675076
-## 18   G_4  3.41002480  0.7808506  1.0926678
-## 19   G_1  0.84529937  2.0679781 -3.9083902
-## 20   G_5  0.06031314 -1.0498293  8.3780060
-## 21   G_5  0.26746736  8.4711937 -0.2193866
-## 22   G_4 -1.01094838  5.1815431 10.1975640
-## 23   G_1  0.85995863  9.4244539 -0.3297125
-## 24   G_3 -1.09388976  0.8949540  5.1246579
-## 25   G_2  0.14817196  7.4075179  5.3113974
+## 1    G_3 -1.17576511  4.7712813  4.1751279
+## 2    G_4  1.60139041  4.3757166  2.8435815
+## 3    G_5  1.44158968  7.4270398 -4.7545307
+## 4    G_1  1.34602649  3.2948322 10.2734721
+## 5    G_2 -0.57938808  6.6670018 24.7614522
+## 6    G_3  0.22533596  5.6724605  9.9216597
+## 7    G_5  0.47071515  3.1610686 10.1946922
+## 8    G_4  3.43789114  0.7040976 -1.6979049
+## 9    G_2  0.63907170  6.2918439  8.7306247
+## 10   G_1 -0.77073500  5.6401788 -9.7717412
+## 11   G_5  0.10680806  7.0035963  5.4933772
+## 12   G_2  2.07447259 -4.4424499  2.0000000
+## 13   G_4 -1.11764625  7.5293019 -1.8479477
+## 14   G_1  0.61983232  2.0138600 -0.4353415
+## 15   G_3  0.90470828  1.0656440 -2.1617010
+## 16   G_2 -2.93572947  0.2634510  7.2304852
+## 17   G_1  1.56819558  4.8625293 -1.1656530
+## 18   G_5  2.72691831 -2.7303820 -2.1210609
+## 19   G_4  2.87715586 -0.8287227 -0.3004653
+## 20   G_3  2.69506130  2.4000935  4.8546466
+## 21   G_3 -1.77848915 -7.6695210  1.1361314
+## 22   G_1 -0.01221104 -2.3475002  8.0721751
+## 23   G_2  6.27280125  3.8414479  6.6030204
+## 24   G_5  0.47789619  3.8684395  9.2846308
+## 25   G_4 -2.02813075  2.1485546  0.1803598
 ```
 
 ```r
@@ -285,17 +285,17 @@ generate_config(10)
 ```
 
 ```
-##    id ngroups    N xmean ymean zmean xvar yvar zvar   col  tile boxplot violin  area point spoke  line polar size      alpha ncolor colorscale score
-## 1   1       9  382     3     5     5   25    9   45  TRUE  TRUE   FALSE   TRUE  TRUE  TRUE  TRUE FALSE FALSE   33 0.78799961      7     Accent    NA
-## 2   2      23 1061     1     3     5    6   13   49  TRUE  TRUE   FALSE   TRUE  TRUE  TRUE  TRUE FALSE  TRUE   44 0.41624284      6     Greens    NA
-## 3   3       8  600     3     3     5   36   13    8 FALSE  TRUE   FALSE   TRUE FALSE FALSE FALSE  TRUE  TRUE   21 0.24689227      7       Reds    NA
-## 4   4       3 1309     3     3     2   41   35   14  TRUE  TRUE    TRUE  FALSE FALSE FALSE  TRUE  TRUE FALSE   38 0.35872706      2      Greys    NA
-## 5   5      14 1427     3     5     4   33   39   33 FALSE FALSE    TRUE  FALSE FALSE FALSE  TRUE FALSE  TRUE   60 0.04521455      6     Greens    NA
-## 6   6      28 1430     2     5     5   31   50   39  TRUE  TRUE   FALSE  FALSE FALSE  TRUE  TRUE  TRUE  TRUE   53 0.75491358      5      Dark2    NA
-## 7   7      26  528     5     4     1   28   46   50 FALSE FALSE    TRUE  FALSE FALSE FALSE FALSE  TRUE  TRUE   25 0.65712413      5    Pastel1    NA
-## 8   8      17  276     3     2     5   39   49   34  TRUE FALSE   FALSE  FALSE  TRUE  TRUE  TRUE  TRUE FALSE   82 0.32238938      6       BuGn    NA
-## 9   9       3  903     5     5     2   25   18   44 FALSE FALSE   FALSE  FALSE  TRUE  TRUE  TRUE  TRUE FALSE   45 0.09305135      8    Pastel2    NA
-## 10 10       4  878     1     5     2   20   29   21  TRUE  TRUE   FALSE  FALSE FALSE FALSE  TRUE FALSE FALSE   69 0.67945568      5    Pastel2    NA
+##    id ngroups    N xmean ymean zmean xvar yvar zvar   col  tile boxplot violin  area point spoke  line polar size     alpha ncolor colorscale score
+## 1   1       5  816     3     1     1    3   29   40 FALSE  TRUE    TRUE  FALSE  TRUE  TRUE  TRUE FALSE  TRUE    4 0.4100064      3       Set2    NA
+## 2   2      22  267     4     5     3   39   17   18 FALSE FALSE   FALSE   TRUE FALSE FALSE  TRUE  TRUE  TRUE   18 0.2611337      7       BuGn    NA
+## 3   3       8 1228     2     3     3   42    6   32  TRUE FALSE    TRUE   TRUE  TRUE FALSE  TRUE FALSE  TRUE   72 0.1009622      5    Pastel2    NA
+## 4   4      20  941     5     5     2    4   29    5  TRUE  TRUE    TRUE  FALSE FALSE  TRUE FALSE  TRUE FALSE   28 0.2823639      7       Set1    NA
+## 5   5      21  471     5     4     4   39   11    7 FALSE FALSE   FALSE   TRUE FALSE FALSE FALSE  TRUE FALSE   99 0.3076460      7    Pastel1    NA
+## 6   6      11 1291     1     5     4   36   34    3  TRUE FALSE    TRUE  FALSE  TRUE  TRUE FALSE FALSE FALSE   42 0.7215566      3       Reds    NA
+## 7   7      14  220     5     3     1   42   17   34 FALSE FALSE   FALSE   TRUE FALSE  TRUE  TRUE  TRUE FALSE   72 0.3998477      4       Set2    NA
+## 8   8      21 1331     4     5     3   28   13   17  TRUE  TRUE   FALSE  FALSE FALSE FALSE FALSE  TRUE  TRUE   45 0.5525464      4     Paired    NA
+## 9   9       4  551     1     2     5   27   36   33 FALSE FALSE    TRUE  FALSE  TRUE FALSE  TRUE  TRUE  TRUE   41 0.2252599      4      Dark2    NA
+## 10 10       6  955     4     4     1   10   13   24  TRUE FALSE    TRUE   TRUE FALSE FALSE FALSE  TRUE FALSE   58 0.4980348      6    Pastel2    NA
 ##    pred_score rated
 ## 1          NA FALSE
 ## 2          NA FALSE

@@ -19,7 +19,21 @@ hotkeys <- c("left",
 
 shinyUI(dashboardPage(
     skin = "black",
-    dashboardHeader(title = "GenRt"),
+    dashboardHeader(title = "GenRt",
+                    
+                    dropdownMenu(
+                        type = "notifications", 
+                        icon = icon("question-circle"),
+                        badgeStatus = NULL,
+                        headerText = "See also:",
+                        
+                        notificationItem("GitHub", icon = icon("file"),
+                                         href = "https://github.com/mthane/GenRt"),
+                        notificationItem("RMarkdown Notebook", icon = icon("file"),
+                                         href = "https://htmlpreview.github.io/?https://github.com/mthane/GenRt/blob/main/GenRtShiny/GenRt.html")
+                    )
+                   
+                    ),
     dashboardSidebar(sidebarMenu(
         menuItem(
             "GenRt",
@@ -138,8 +152,6 @@ shinyUI(dashboardPage(
                 
             ),
             tabItem("about",
-                    
-                    uiOutput("markdown"),
                     fluidRow(column(
                         6,
                         wellPanel(

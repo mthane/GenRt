@@ -86,8 +86,6 @@ generate_plot <-
       
       scale_color_brewer(palette = colorscale) +
       scale_fill_brewer(palette = colorscale) +
-      #geom_col()+
-      #theme_bw()# +
       theme(
         line = element_blank(),
         text = element_blank(),

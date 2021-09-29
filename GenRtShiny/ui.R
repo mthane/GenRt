@@ -151,7 +151,11 @@ shinyUI(dashboardPage(
 
                              ),
                     tabPanel("Progression",
-                             plotOutput("responses")),
+                             plotOutput("responses"),
+                             
+                             plotOutput("accs")
+                             
+                             ),
                     tabPanel("Model",
                              fluidRow(
                                  column(6,

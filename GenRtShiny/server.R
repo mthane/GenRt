@@ -70,7 +70,8 @@ shinyServer(function(input, output) {
     globalValues <- reactiveValues(data = generate_config(NPOP),
                               start=T,
                               start2=T,
-                              model_not_built=T
+                              model_not_built=T,
+                              accuracies = c()
     )
     
     # observeEvent(globalValues$start, {
@@ -111,7 +112,7 @@ shinyServer(function(input, output) {
             globalValues$data[idx, "rated"] <- T
         }
         globalValues$start2=F
-
+            
         if(length(which(globalValues$data$score==1))>0){
             new_art <- crossover(globalValues$data %>%filter(score==1),id=max(globalValues$data$id)+1)
             globalValues$data <- rbind(globalValues$data,new_art)
@@ -126,7 +127,15 @@ shinyServer(function(input, output) {
                             type = "raw")
             globalValues$data[idx_not_rated,]$pred_score <- as.numeric(pred)-1
             globalValues$data$pred_score <- as.factor(globalValues$data$pred_score)
-
+            
+            #adding accuracy
+            accuracy = globalValues$data %>%
+                filter(rated==T)%>%
+                mutate(hits = score==pred_score)%>%
+                summarise(accuracy = sum(hits,na.rm=T)/n())%>%
+                select(accuracy)%>%
+                unlist()
+            globalValues$accuracies <- c(globalValues$accuracies,accuracy) 
         }
     })
     
@@ -392,6 +401,18 @@ shinyServer(function(input, output) {
             theme_bw()
         
     })
+    
+    output$accs <- renderPlot({
+        
+        accs <- data.frame(n =c(rep(NA,5),seq(1,length(globalValues$accuracies))), acc = c(rep(NA,5),globalValues$accuracies))
+        
+        
+        ggplot(aes(n,acc),data = accs)+
+            geom_line()+
+            theme_bw()
+        
+    })
+    
     
     # Model Evalutation
     
